@@ -1,45 +1,82 @@
-﻿using UnityEngine;
-using System.Collections;
-using UniDialog;
-using UniDialog.Preset.Confirm.Domain;
-using UniRx;
+﻿using System.Collections.Generic;
 using UniDialog.Domain;
-using System.Collections.Generic;
+using UnityEngine;
 using UniDialog.Presentation;
+using UniRx;
+using UnityEngine.UI;
 
 public class DialogDemo : MonoBehaviour
 {
 
-    [SerializeField]
-    Transform _dialogContainer = null;
+    [SerializeField] DialogRootPresenter _dialogRoot;
 
-    DialogQueueModel queue;
+    [SerializeField] Button _confirmDialogButton;
 
-    void Start () {
-        queue = DialogBuilder.CreateQueue(_dialogContainer);
-        ShowDialog("First Dialog");
+    [SerializeField] Button _menuDialogButton;
+
+    [SerializeField] Button _stackDialogButton;
+
+    int n;
+
+    void Start()
+    {
+        _confirmDialogButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            var dialog = new ConfirmDialog("Are you ok?", ConfirmDialogSize.Minimum);
+            dialog.Stackable = false;
+            _dialogRoot.Enqueue(dialog);
+        }).AddTo(this);
+
+        _menuDialogButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            var content = new MenuDialogContentModel();
+            content.MenuItems.Add(new MenuDialogItemModel("apple", "Apple"));
+            content.MenuItems.Add(new MenuDialogItemModel("banana", "Banana"));
+            content.MenuItems.Add(new MenuDialogItemModel("tomato", "Tomato"));
+
+            var dialog = new MenuDialog("Menu", content);
+            dialog.OnClickAsObservable().Subscribe(b =>
+            {
+                Debug.Log("Clicked: " + b.Id);
+                dialog.Close();
+            }).AddTo(this);
+
+            _dialogRoot.Enqueue(dialog);
+        }).AddTo(this);
+
+        _stackDialogButton.OnClickAsObservable().Subscribe(_ =>
+        {
+            n = 0;
+            AddDialog(n++, true);
+        }).AddTo(this);
     }
 
-    void ShowDialog(string title)
+    void AddDialog(int id, bool stackable)
     {
-        var okButton = new ConfirmDialogButton("OK");
-        okButton.ClickStream.Subscribe(d =>
+        var buttons = new List<IDialogButton>();
+        buttons.Add(new ConfirmDialogButton("add", "Enqueue"));
+        buttons.Add(new ConfirmDialogButton("stack", "Overlay"));
+        buttons.Add(new ConfirmDialogButton("close", "Close"));
+
+        var dialog = new ConfirmDialog("Dialog " + id + (stackable ? "(Stackable)": ""), buttons, ConfirmDialogSize.Small);
+        dialog.OnClickAsObservable().Subscribe(b =>
+        {
+            switch(b.Id)
             {
-                d.Close();
-                ShowDialog("Dialog: " + Random.Range(0, 999));
-            }).AddTo(this);
+                case "add":
+                    AddDialog(n++, false);
+                    break;
+                case "stack":
+                    AddDialog(n++, true);
+                    break;
+                case "close":
+                    dialog.Close();
+                    break;
+            }
+        }).AddTo(this);
+        dialog.Stackable = stackable;
 
-        var cancelButton = new ConfirmDialogButton("Cancel");
-        cancelButton.ClickStream.Subscribe(d =>
-            {
-                d.Close();
-                ShowDialog("Dialog: " + Random.Range(0, 999));
-            }).AddTo(this);
-
-        var dialog = new ConfirmDialog(title, new List<IDialogButton> { okButton, cancelButton }, ConfirmDialogSize.Minimum);
-        dialog.CloseOnTouchOutside = false;
-
-        queue.Enqueue(dialog);
+        _dialogRoot.Enqueue(dialog);
     }
 
 }
