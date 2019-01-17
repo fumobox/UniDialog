@@ -1,12 +1,13 @@
-﻿using TweenRx;
-using UniDialog.Domain;
+﻿using UniDialog.Domain;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
+using TweenRx;
+using UniDialog.Infrastructure;
 
 namespace UniDialog.Presentation
 {
-    public class ConfirmDialogPresenter : DialogPresenter
+    public class MenuDialogPresenter : DialogPresenter
     {
         [SerializeField]
         CanvasGroupFadeAnimator _canvasGroupFadeAnimator;
@@ -18,24 +19,9 @@ namespace UniDialog.Presentation
         {
             base.Initialize(argument, template);
 
-            var fp = (ConfirmDialogFramePresenter)_framePresenter;
+            var fp = (MenuDialogFramePresenter)_framePresenter;
 
-            var cd = (ConfirmDialog)argument;
-
-            for (int i = 0; i < fp.Buttons.Count; i++)
-            {
-                if (i < cd.Buttons.Count)
-                {
-                    fp.Buttons[i].gameObject.SetActive(true);
-                    var b = fp.Buttons[i];
-                    cd.Buttons[i].Owner = argument;
-                    b.Initialize(cd.Buttons[i]);
-                }
-                else
-                {
-                    fp.Buttons[i].gameObject.SetActive(false);
-                }
-            }
+            var cd = (MenuDialog)argument;
 
             _outSideButton.OnClickAsObservable().Subscribe(_ =>
                 {

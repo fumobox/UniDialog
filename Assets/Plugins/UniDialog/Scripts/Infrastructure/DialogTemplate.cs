@@ -1,7 +1,7 @@
 ﻿using UniDialog.Presentation;
 using UnityEngine;
 
-namespace UniDialog
+namespace UniDialog.Infrastructure
 {
 
     [CreateAssetMenu]

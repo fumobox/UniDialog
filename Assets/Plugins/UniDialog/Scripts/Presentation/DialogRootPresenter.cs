@@ -3,6 +3,7 @@ using UniRx;
 using UnityEngine;
 using UniDialog.Domain;
 using System.Linq;
+using UniDialog.Infrastructure;
 
 namespace UniDialog.Presentation
 {

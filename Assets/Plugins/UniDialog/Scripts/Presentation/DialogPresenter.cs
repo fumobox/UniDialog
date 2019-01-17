@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UniDialog.Domain;
+using UniDialog.Infrastructure;
 
 namespace UniDialog.Presentation
 {
