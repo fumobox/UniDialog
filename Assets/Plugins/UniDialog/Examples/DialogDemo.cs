@@ -37,7 +37,7 @@ public class DialogDemo : MonoBehaviour
             var dialog = new MenuDialog("Menu", content);
             dialog.OnClickAsObservable().Subscribe(b =>
             {
-                Debug.Log("Clicked: " + b.Id);
+                _dialogRoot.Enqueue(new ConfirmDialog(b.Name, ConfirmDialogSize.Minimum));
                 dialog.Close();
             }).AddTo(this);
 
@@ -78,5 +78,4 @@ public class DialogDemo : MonoBehaviour
 
         _dialogRoot.Enqueue(dialog);
     }
-
 }
